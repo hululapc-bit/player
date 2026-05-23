@@ -8,7 +8,7 @@
 
 ## Screenshot
 
-![WebRainmeter dashboard](https://hululapc-bit.github.io/player/assets/fallback-cover.png)
+![WebRainmeter dashboard](frontend/assets/screenshot.png)
 
 > _Live demo auto-plays mock tracks. No install needed._
 
