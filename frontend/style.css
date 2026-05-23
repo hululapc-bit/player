@@ -1449,4 +1449,38 @@ body.perf-no-glow #play-pause {
   opacity: 0.4;
 }
 
-
+/* ─── LYRICS FALLBACK ───────────────────────────────────────── */
+.lyrics-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  min-height: 120px;
+  padding: 24px;
+  text-align: center;
+  animation: fadeIn 0.4s ease;
+}
+.lyrics-fallback-icon {
+  font-size: 36px;
+  opacity: 0.18;
+  color: var(--accent);
+  line-height: 1;
+  filter: drop-shadow(0 0 8px var(--accent));
+}
+.lyrics-fallback-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.55;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.lyrics-fallback-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.6;
+  letter-spacing: 0.04em;
+}

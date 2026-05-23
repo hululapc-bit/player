@@ -817,7 +817,7 @@ async function loadLyrics(track) {
   } catch {
     state.lyrics = [];
     state.syncedLyrics = false;
-    els.lyrics.innerHTML = "<p>No synced lyrics found</p>";
+    renderLyricsFallback();
     if (els.copyLyrics) els.copyLyrics.classList.add("hidden");
   }
 }
@@ -830,9 +830,18 @@ function updateLyricsPadding() {
   }
 }
 
+function renderLyricsFallback() {
+  els.lyrics.innerHTML = `
+    <div class="lyrics-fallback">
+      <div class="lyrics-fallback-icon">♪</div>
+      <div class="lyrics-fallback-title">No lyrics found</div>
+      <div class="lyrics-fallback-sub">LRCLIB doesn't have this track yet</div>
+    </div>`;
+}
+
 function renderLyrics() {
   if (!state.lyrics.length) {
-    els.lyrics.innerHTML = "<p>No synced lyrics found</p>";
+    renderLyricsFallback();
     if (els.copyLyrics) els.copyLyrics.classList.add("hidden");
     return;
   }

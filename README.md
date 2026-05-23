@@ -1,14 +1,24 @@
 # WebRainmeter
 
-WebRainmeter is a Rainmeter-inspired browser music dashboard for daily desktop use. It runs a local Flask backend, listens to WebNowPlaying Redux through a Custom Adapter, and renders album art, synced lyrics, weather, progress, controls, history, and a retro dark dashboard UI in the browser.
+> A Rainmeter-inspired browser music dashboard — album art, synced lyrics, weather, playback controls, and a retro dark UI. Runs locally via Flask + WebNowPlaying, with a static portfolio demo on GitHub Pages.
 
-The live app is local-first. The GitHub Pages version is a static portfolio demo with fake tracks, so visitors can see the UI without installing WebNowPlaying or running Python.
+**[▶ Live Demo](https://hululapc-bit.github.io/player/)**
+
+---
+
+## Screenshot
+
+![WebRainmeter dashboard](https://hululapc-bit.github.io/player/assets/fallback-cover.png)
+
+> _Live demo auto-plays mock tracks. No install needed._
+
+---
 
 ## What It Does
 
 - Now-playing dashboard with album art, title, artist, album, source, and progress
 - Playback controls through WebNowPlaying where the source supports them
-- Synced LRCLIB lyrics with active-line scrolling
+- Synced LRCLIB lyrics with active-line scrolling and styled fallback state
 - OpenWeather current conditions
 - Dynamic accent color from album art
 - Dummy streaming visualizer plus optional microphone/live input mode
@@ -33,14 +43,17 @@ Demo mode uses mock tracks and does not call `/nowplaying`, `/lyrics`, `/weather
 ## Quick Start
 
 ```powershell
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 Copy-Item config.env.example config.env
-python server.py
+# edit config.env with your API key
+python backend/server.py
 ```
 
 Open [http://localhost:5000/](http://localhost:5000/).
 
 In the WebNowPlaying extension popup, enable `Custom Adapter` and set the port to `1234`.
+
+Alternatively, double-click `scripts/play.bat` to start the server and open the browser automatically.
 
 ## API
 
@@ -53,7 +66,7 @@ In the WebNowPlaying extension popup, enable `Custom Adapter` and set the port t
 
 ## GitHub Pages
 
-This repo includes `.github/workflows/pages.yml`. After pushing to `main`, enable Pages in the repository settings with GitHub Actions as the source. The workflow publishes only the `frontend/` folder.
+This repo includes `.github/workflows/pages.yml`. Pushing to `main` auto-deploys the `frontend/` folder to GitHub Pages. No build step required.
 
 ## Visualizer Limitation
 
