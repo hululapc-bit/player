@@ -15,6 +15,22 @@ try:
 except ImportError:
     WNPRedux = None
 
+try:
+    import base64
+    from mutagen import File as MutaFile
+    from mutagen.id3 import ID3
+except ImportError:
+    MutaFile = None
+    ID3 = None
+
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+except ImportError:
+    Observer = None
+    FileSystemEventHandler = None
+
+
 
 ROOT = Path(__file__).resolve().parent          # backend/
 PROJECT_ROOT = ROOT.parent                        # project root
@@ -25,6 +41,11 @@ load_dotenv(PROJECT_ROOT / "config.env", override=True)
 weather_key = os.getenv("OPENWEATHER_API_KEY", "").strip()
 key_preview = weather_key[:4] if weather_key else "None"
 print(f"Weather Key Loaded (first 4 chars): {key_preview}", flush=True)
+
+LOCAL_WATCH_FOLDER = os.getenv("LOCAL_WATCH_FOLDER", "").strip()
+LOCAL_WATCH_ENABLED = os.getenv("LOCAL_WATCH_ENABLED", "false").strip().lower() == "true"
+_local_now_playing = None
+
 
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
 
@@ -303,6 +324,159 @@ def plain_lyrics_to_lines(plain_lyrics):
     ]
 
 
+def get_embedded_cover(path):
+    if MutaFile is None or ID3 is None:
+        return None
+    # Try ID3 (MP3, etc.)
+    try:
+        audio_id3 = ID3(path)
+        for key in audio_id3.keys():
+            if key.startswith("APIC:"):
+                apic = audio_id3[key]
+                mime = apic.mime or "image/jpeg"
+                encoded = base64.b64encode(apic.data).decode('utf-8')
+                return f"data:{mime};base64,{encoded}"
+    except Exception:
+        pass
+    
+    # Try FLAC or generic formats with .pictures
+    try:
+        audio = MutaFile(path)
+        if audio is not None and hasattr(audio, "pictures") and audio.pictures:
+            pic = audio.pictures[0]
+            mime = pic.mime or "image/jpeg"
+            encoded = base64.b64encode(pic.data).decode('utf-8')
+            return f"data:{mime};base64,{encoded}"
+    except Exception:
+        pass
+        
+    return None
+
+
+def read_local_metadata(path):
+    if MutaFile is None:
+        return None
+    try:
+        audio = MutaFile(path, easy=True)
+        if audio is None:
+            return None
+        tags = audio.tags or {}
+        
+        title = tags.get("title", [os.path.basename(path)])[0]
+        artist = tags.get("artist", ["Unknown Artist"])[0]
+        album = tags.get("album", [""])[0]
+        
+        duration_ms = 0
+        if audio.info and hasattr(audio.info, "length"):
+            duration_ms = int(audio.info.length * 1000)
+            
+        cover_url = get_embedded_cover(path)
+        
+        return {
+            "available": True,
+            "title": title or os.path.basename(path),
+            "artist": artist or "Unknown Artist",
+            "album": album or "",
+            "cover_url": cover_url or "",
+            "progress_ms": 0,
+            "duration_ms": duration_ms,
+            "is_playing": True,
+            "source": "Local File",
+            "can_play_pause": False,
+            "can_skip_previous": False,
+            "can_skip_next": False,
+            "updated_at": int(time.time()),
+            "message": "",
+        }
+    except Exception:
+        return None
+
+
+def scan_most_recent(folder):
+    audio_files = []
+    for root_dir, _, files in os.walk(folder):
+        for f in files:
+            if f.lower().endswith(('.mp3', '.opus', '.wav', '.flac')):
+                full_path = os.path.join(root_dir, f)
+                try:
+                    stat = os.stat(full_path)
+                    mtime = max(stat.st_mtime, stat.st_atime)
+                    audio_files.append((full_path, mtime))
+                except Exception:
+                    pass
+    if audio_files:
+        audio_files.sort(key=lambda x: x[1], reverse=True)
+        most_recent_file = audio_files[0][0]
+        meta = read_local_metadata(most_recent_file)
+        if meta:
+            global _local_now_playing
+            with state_lock:
+                _local_now_playing = meta
+            print(f"[local] Initial scan found: {meta['title']} - {meta['artist']}", flush=True)
+
+
+def process_file(path):
+    if not path.lower().endswith(('.mp3', '.opus', '.wav', '.flac')):
+        return
+    time.sleep(0.2)
+    try:
+        meta = read_local_metadata(path)
+        if meta:
+            global _local_now_playing
+            with state_lock:
+                _local_now_playing = meta
+            print(f"[local] Track updated: {meta['title']} - {meta['artist']}", flush=True)
+    except Exception:
+        pass
+
+
+if FileSystemEventHandler is not None:
+    class LocalMusicHandler(FileSystemEventHandler):
+        def __init__(self, callback):
+            super().__init__()
+            self.callback = callback
+            
+        def on_modified(self, event):
+            if not event.is_directory:
+                self.callback(event.src_path)
+                
+        def on_created(self, event):
+            if not event.is_directory:
+                self.callback(event.src_path)
+else:
+    LocalMusicHandler = None
+
+
+def start_local_watcher():
+    if not LOCAL_WATCH_ENABLED:
+        print("[local] Watcher disabled", flush=True)
+        return
+
+    if not LOCAL_WATCH_FOLDER or not os.path.isdir(LOCAL_WATCH_FOLDER):
+        print("[local] Watcher disabled", flush=True)
+        return
+
+    if Observer is None or FileSystemEventHandler is None or MutaFile is None:
+        print("[local] Watcher disabled", flush=True)
+        return
+
+    print(f"[local] Watching: {LOCAL_WATCH_FOLDER}", flush=True)
+
+    try:
+        scan_most_recent(LOCAL_WATCH_FOLDER)
+    except Exception:
+        pass
+
+    try:
+        event_handler = LocalMusicHandler(process_file)
+        observer = Observer()
+        observer.daemon = True
+        observer.schedule(event_handler, path=LOCAL_WATCH_FOLDER, recursive=True)
+        observer.start()
+    except Exception as e:
+        print(f"[local] Error starting watchdog observer: {e}", flush=True)
+
+
 @app.route("/")
 def index():
     return send_from_directory(FRONTEND_DIR, "index.html")
@@ -313,10 +487,25 @@ def health():
     return jsonify({"status": "ok"})
 
 
+def wnp_has_active_track(state):
+    if not state or not state.get("available"):
+        return False
+    title = state.get("title", "").strip()
+    if not title or title.lower() in {"unknown title", "unknown"}:
+        return False
+    return True
+
+
 @app.route("/nowplaying")
 def get_now_playing():
     with state_lock:
-        return jsonify(now_playing.copy())
+        if wnp_has_active_track(now_playing):
+            return jsonify(now_playing.copy())
+        elif LOCAL_WATCH_ENABLED and _local_now_playing:
+            return jsonify(_local_now_playing.copy())
+        else:
+            return jsonify(now_playing.copy())
+
 
 
 @app.route("/control", methods=["POST"])
@@ -644,6 +833,8 @@ def cover():
 
 start_adapter()
 threading.Thread(target=polling_loop, daemon=True).start()
+start_local_watcher()
+
 
 
 if __name__ == "__main__":

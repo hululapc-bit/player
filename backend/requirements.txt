@@ -2,3 +2,6 @@ Flask==3.0.3
 python-dotenv==1.0.1
 requests==2.32.3
 pywnp==1.0.5
+mutagen==1.47.0
+watchdog>=4.0.1
+
