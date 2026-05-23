@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+.venv-check/
+.tmp-pywnp/
+
+# Secrets & local config
+config.env
+.env
+
+# Debug / temp output
+_debug_raw.txt
+report.txt
+*.log
+
+# Editor / OS
+.DS_Store
+Thumbs.db

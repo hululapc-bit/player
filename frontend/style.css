@@ -1,0 +1,1452 @@
+/* ============================================================
+   WebRainmeter — style.css
+   Design direction: Y2K retro-digital × dark dashboard (PRD v3)
+   ============================================================ */
+
+/* ─── DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  --accent: #5b9cf6;
+  --accent-soft: rgba(91, 156, 246, 0.24);
+  --accent-glow: rgba(91, 156, 246, 0.10);
+  --bg: #090b10;
+  --bg-panel: rgba(8, 10, 12, 0.68);
+  --text: #d8e8ff;
+  --text-bright: #f0f6ff;
+  --muted: #3a5070;
+  --muted-label: #1e2e42;
+  --dim: #2a3a55;
+  --divider: #141820;
+  --lyric-past: #2e4060;
+  --lyric-active: #d8e8ff;
+  --lyric-future: #2a3a55;
+  --viz-lit: var(--accent);
+  --viz-mid: color-mix(in srgb, var(--accent) 45%, transparent);
+  --viz-dim: color-mix(in srgb, var(--accent) 15%, transparent);
+  --idle-bar-low: #1e3a5a;
+  --idle-bar-high: #2a5888;
+  --pip-dim: color-mix(in srgb, var(--accent) 15%, transparent);
+  --art-border: #1e2a3a;
+  color-scheme: dark;
+}
+
+/* ─── RESET ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Share Tech Mono', 'Consolas', monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── BACKGROUND LAYER ──────────────────────────────────────── */
+.background { position: fixed; inset: 0; z-index: 0; }
+
+.background img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10vw;
+  height: 10vh;
+  object-fit: cover;
+  filter: blur(6px) brightness(0.28) saturate(1.3);
+  transform: translate(-50%, -50%) scale(11.5);
+  opacity: 0.6;
+  transition: opacity 600ms ease;
+}
+
+/* Scanline overlay — 4px repeat, 7% opacity */
+.scanlines {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 4px,
+    rgba(0, 0, 0, 0.12) 4px,
+    rgba(0, 0, 0, 0.12) 5.5px
+  );
+  opacity: 0.07;
+  z-index: 1;
+}
+
+/* Radial accent glow — shifts with track */
+.glow {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 60% at 35% 45%,
+    var(--accent-glow) 0%,
+    transparent 70%
+  );
+  opacity: 0.7;
+  transition: background 800ms ease;
+  z-index: 2;
+}
+
+/* ─── DASHBOARD SHELL ───────────────────────────────────────── */
+.dashboard {
+  position: relative; z-index: 3;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0;
+  width: min(1569.5px, calc(100vw - 64px));
+  height: calc(100vh - 64px);
+  margin: 32px auto;
+  padding: 0;
+}
+
+/* ─── TOPBAR ────────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 0;
+}
+
+.clock {
+  font: 700 clamp(2.4rem, 6vw, 4.5rem) 'Share Tech Mono', monospace;
+  letter-spacing: 2.5px;
+  color: var(--text-bright);
+  text-shadow: 0 0 26.5px var(--accent-glow);
+}
+
+.topbar-source {
+  display: flex;
+  align-items: center;
+  gap: 10.5px;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--accent);
+}
+
+.pip {
+  width: 9.5px; height: 9.5px;
+  border-radius: 50%;
+  background: var(--pip-dim);
+  animation: pip-blink 2s ease-in-out infinite;
+}
+
+@keyframes pip-blink {
+  0%, 100% { background: var(--pip-dim); box-shadow: none; }
+  50% { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+}
+
+.topbar-source-text { white-space: nowrap; }
+
+.weather {
+  display: flex;
+  align-items: center;
+  gap: 13.5px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.weather-text { text-align: right; }
+
+.weather-temp {
+  font-size: 1.46rem;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+.weather-condition {
+  font-size: 0.93rem;
+  color: color-mix(in srgb, var(--accent) 70%, var(--text));
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-source,
+.weather {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15), 0 0 10px var(--accent-glow);
+}
+
+.weather-icon {
+  width: 53px; height: 53px;
+  object-fit: contain;
+  filter: brightness(1.2);
+}
+
+.weather-icon[src=""],
+.weather-icon:not([src]) { display: none; }
+
+/* ─── MAIN 3-COLUMN AREA ───────────────────────────────────── */
+.main-area {
+  display: grid;
+  grid-template-columns: 1.618fr 2.618fr 1.618fr;
+  gap: 26.5px;
+  min-height: 0;
+  padding: 24px 0;
+  overflow: hidden;
+  transition: grid-template-columns 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-area.sidebar-collapsed {
+  grid-template-columns: 1.618fr 3.618fr 0fr;
+  gap: 0;
+}
+
+/* ─── COLUMN 1: NOW PLAYING ─────────────────────────────────── */
+.col-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18.5px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Album Art Shell */
+.album-shell {
+  position: relative;
+  width: min(340px, 100%, 35vh);
+  height: min(340px, 100%, 35vh);
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  border: 0.7px solid var(--art-border);
+  background: #0a0d12;
+  box-shadow: 0 10.5px 53px rgba(0,0,0,0.5), 0 0 66.5px var(--accent-glow);
+  overflow: hidden;
+  flex-shrink: 1;
+}
+
+.album-art {
+  width: 100%; height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: opacity 320ms ease;
+}
+
+/* Corner Pip */
+.corner-pip {
+  position: absolute;
+  top: 10.5px; right: 10.5px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--pip-dim);
+  animation: pip-blink 2s ease-in-out infinite;
+  z-index: 4;
+}
+
+/* Idle Screen */
+.idle-screen {
+  position: absolute; inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13.5px;
+  background: rgba(9, 11, 16, 0.85);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+
+.idle .idle-screen { opacity: 1; }
+
+.idle-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 80px;
+}
+
+.idle-eq span {
+  display: block;
+  width: 12px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(to top, var(--idle-bar-low), var(--idle-bar-high));
+  animation: eq-pulse 1.2s ease-in-out infinite;
+}
+
+.idle-eq span:nth-child(1) { height: 36px; animation-delay: 0s; }
+.idle-eq span:nth-child(2) { height: 56px; animation-delay: 0.15s; }
+.idle-eq span:nth-child(3) { height: 44px; animation-delay: 0.3s; }
+.idle-eq span:nth-child(4) { height: 70px; animation-delay: 0.1s; }
+.idle-eq span:nth-child(5) { height: 40px; animation-delay: 0.25s; }
+.idle-eq span:nth-child(6) { height: 60px; animation-delay: 0.05s; }
+.idle-eq span:nth-child(7) { height: 32px; animation-delay: 0.35s; }
+
+@keyframes eq-pulse {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
+}
+
+.idle-dots {
+  display: flex;
+  gap: 6.5px;
+}
+
+.idle-dots span {
+  width: 5.5px; height: 5.5px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: dot-blink 1.4s ease-in-out infinite;
+}
+
+.idle-dots span:nth-child(2) { animation-delay: 0.2s; }
+.idle-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.idle-text {
+  font: 700 10.5px/1 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--muted);
+  animation: text-blink 1.6s step-end infinite;
+}
+
+@keyframes text-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Track Info */
+.track-info {
+  min-width: 0;
+}
+
+.title {
+  font: 400 1.53rem/1.2 'Special Elite', cursive;
+  color: var(--text-bright);
+  overflow-wrap: anywhere;
+  margin: 0;
+  max-height: 3.6em;
+  overflow: hidden;
+}
+
+.artist-album {
+  margin: 8px 0 0;
+  font: 400 0.9rem/1.3 'Share Tech Mono', monospace;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+
+.separator {
+  margin: 0 5.5px;
+  color: var(--accent);
+  opacity: 0.3;
+}
+
+/* Transport / Progress */
+.transport {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10.5px;
+}
+
+.progress {
+  flex: 1;
+  height: 3px;
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  cursor: pointer;
+  position: relative;
+  border-radius: 1.5px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  border-radius: 1.5px;
+  box-shadow: 0 0 13.5px var(--accent-soft);
+  position: relative;
+  transition: width 200ms linear;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%) scale(1);
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-soft);
+  transition: transform 150ms ease;
+}
+
+.progress:hover .progress-fill::after {
+  transform: translateY(-50%) scale(1.3);
+}
+
+.progress-time {
+  font: 700 0.86rem/1 'Share Tech Mono', monospace;
+  color: var(--accent);
+  opacity: 0.7;
+  min-width: 45px;
+}
+
+#elapsed {
+  text-align: left;
+}
+
+#duration {
+  text-align: right;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.controls button {
+  width: auto;
+  height: auto;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  opacity: 0.75;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 150ms ease, opacity 150ms ease, filter 150ms ease;
+}
+
+.controls button svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 0;
+}
+
+.controls button.icon-stroke svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+#play-pause svg {
+  width: 32px;
+  height: 32px;
+}
+
+.controls button:hover {
+  transform: scale(1.15);
+  opacity: 1;
+  filter: drop-shadow(0 0 8px var(--accent-soft));
+}
+
+.controls button:active {
+  transform: scale(0.95);
+}
+
+.controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+
+/* ─── COLUMN 2: LYRICS ──────────────────────────────────────── */
+.col-lyrics {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 26.5px;
+}
+
+.lyrics {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(transparent, black 15%, black 85%, transparent);
+  -webkit-mask-image: linear-gradient(transparent, black 15%, black 85%, transparent);
+}
+
+.lyrics::-webkit-scrollbar { display: none; }
+
+.lyrics p {
+  margin: 0 0 10.5px;
+  color: color-mix(in srgb, var(--accent) 30%, transparent);
+  font: 400 15px/2.2 'Share Tech Mono', monospace;
+  text-align: left;
+  transition: color 200ms ease, font-size 200ms ease, padding 200ms ease, border 200ms ease;
+}
+
+/* Past lines */
+.lyrics p.past {
+  color: color-mix(in srgb, var(--accent) 30%, transparent);
+  font-size: 15px;
+}
+
+/* Active line */
+.lyrics p.active {
+  color: var(--accent);
+  font: 400 20px/2.2 'Special Elite', cursive;
+  border-left: 2.5px solid var(--accent);
+  padding-left: 13.5px;
+  text-shadow: 0 0 18.5px var(--accent-glow);
+}
+
+/* ─── COLUMN 3: SIDEBAR ─────────────────────────────────────── */
+.col-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 5.5px 0;
+  min-height: 0;
+  overflow: hidden;
+  transition: opacity 250ms ease;
+}
+
+.sidebar-collapsed .col-sidebar {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 13.5px 0;
+}
+
+.sidebar-label {
+  font: 700 10.5px/1 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--accent);
+  opacity: 0.6;
+}
+
+.sidebar-value {
+  font: 400 1.04rem/1.3 'Share Tech Mono', monospace;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.mood-pill {
+  display: inline-block;
+  padding: 4px 10.5px;
+  border: 0.7px solid var(--accent);
+  border-radius: 4px;
+  font-size: 0.96rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+.sidebar-divider {
+  display: none;
+}
+
+/* ─── VISUALIZER ────────────────────────────────────────────── */
+.visualizer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 69px;
+  padding: 0;
+  overflow: hidden;
+  justify-content: center;
+}
+
+#visualizer-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.visualizer-controls {
+  position: absolute;
+  bottom: 5.5px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.viz-mic-btn {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 50%;
+  padding: 5px;
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 6px var(--accent-glow);
+  transition: transform 150ms ease, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  width: 24px;
+  height: 24px;
+}
+
+.viz-mic-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.viz-mic-btn:hover {
+  transform: scale(1.1);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  border-color: var(--accent);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 10px var(--accent-soft);
+}
+
+.viz-mic-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  box-shadow: 0 0 15px var(--accent);
+}
+
+.viz-label {
+  font: 700 10.5px/1 'Share Tech Mono', monospace;
+  color: var(--accent);
+  opacity: 0.35;
+  letter-spacing: 2px;
+  text-shadow: 0 0 6px var(--accent-glow);
+  pointer-events: none;
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────────── */
+@media (max-width: 1091px) {
+  body { overflow: auto; }
+
+  .dashboard {
+    width: min(100vw - 32px, 691.5px);
+    height: auto;
+    min-height: 100vh;
+    margin: 16px auto;
+  }
+
+  .main-area {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 18.5px;
+  }
+
+  .col-player {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 18.5px;
+    align-items: flex-start;
+  }
+
+  .album-shell {
+    width: 146.5px; height: 146.5px;
+  }
+
+  .track-info { flex: 1; min-width: 186px; }
+
+  .transport { width: 100%; }
+
+  .col-lyrics {
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-bottom: none;
+    padding: 16px 0;
+    min-height: 266px;
+    max-height: 399px;
+  }
+
+  .col-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .sidebar-section {
+    flex: 1 0 45%;
+    min-width: 133px;
+  }
+
+  .sidebar-divider { display: none; }
+
+  .title { font-size: 1.33rem; }
+}
+
+/* ==========================================================================
+   POLISH ADJUSTMENTS (Revert by deleting or commenting specific parts)
+   ========================================================================== */
+
+/* --- POLISH #1: Lyrics Contrast Boost & Column Blur --- */
+.col-lyrics {
+  backdrop-filter: blur(6px);
+  background: rgba(9, 11, 16, 0.25);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 20px 26.5px !important;
+}
+.lyrics p {
+  color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.lyrics p.past {
+  color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.lyrics p.active {
+  color: var(--accent);
+  border-left-width: 3px;
+  text-shadow: 0 0 12px var(--accent-soft), 0 0 24px var(--accent-glow);
+}
+
+/* --- POLISH #2: Translucent Sidebar & Clean Dividers --- */
+.col-sidebar {
+  background: rgba(9, 11, 16, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px 20px;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent) 30%, transparent) transparent;
+}
+.col-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.col-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.col-sidebar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 4px;
+}
+.col-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+.sidebar-section {
+  padding: 10px 0;
+  margin: 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+.sidebar-section:last-child {
+  border-bottom: none;
+}
+.main-area {
+  grid-template-columns: 1.618fr 2.618fr 1.618fr;
+}
+
+/* --- POLISH #3: Album Section Hierarchy --- */
+.track-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.track-info .title {
+  font-family: 'Special Elite', cursive;
+  font-size: 1.68rem;
+  color: var(--text-bright);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.artist-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.album-meta-container {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  color: rgba(216, 232, 255, 0.45);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.album-meta-divider {
+  color: var(--accent);
+  opacity: 0.4;
+}
+.album-name:empty,
+.album-name:empty ~ .album-meta-divider,
+.album-name:empty ~ .album-duration {
+  display: none;
+}
+
+/* --- POLISH #4: Horizontal Wave visualizer replaces vertical bars --- */
+
+/* --- POLISH #5: Color Depth, Neutral Blacks & Warm Accents --- */
+:root {
+  --bg: #040405;
+  --bg-panel: rgba(5, 6, 8, 0.75);
+  --warm-accent: #ffb74d;
+  --yellow-highlight: #ffee58;
+}
+.background img {
+  opacity: 0.35;
+  filter: blur(8px) brightness(0.18) saturate(0.95);
+}
+.mood-pill {
+  border-color: var(--warm-accent) !important;
+  color: var(--warm-accent) !important;
+  box-shadow: 0 0 10px rgba(255, 183, 77, 0.15);
+}
+.pip, .corner-pip {
+  background: var(--yellow-highlight) !important;
+}
+@keyframes pip-blink {
+  0%, 100% { background: color-mix(in srgb, var(--yellow-highlight) 20%, transparent); box-shadow: none; }
+  50% { background: var(--yellow-highlight); box-shadow: 0 0 8px var(--yellow-highlight); }
+}
+.progress-fill::after {
+  background: var(--warm-accent) !important;
+  box-shadow: 0 0 10px var(--warm-accent) !important;
+}
+
+/* --- POLISH #6: Center Area Diagnostics (Ghost EQ Removed) --- */
+.col-lyrics {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+.lyric-bg-diagnostics {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  opacity: 0.8;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+.lyric-bg-diagnostics .diag-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.lyric-bg-diagnostics .diag-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+.lyric-bg-diagnostics .diag-val {
+  font-weight: 700;
+}
+.lyrics {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* --- POLISH #7: Share Tech Mono Typographic Expansion --- */
+.progress-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 8px var(--accent-soft);
+}
+.sidebar-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 0 6px var(--accent-glow);
+}
+.sidebar-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.viz-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--accent);
+  opacity: 0.35;
+}
+.topbar-source-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+/* --- POLISH #8: CRT Screen Imperfections & Bloom --- */
+body::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, transparent 55%, rgba(0, 0, 0, 0.75) 100%);
+  pointer-events: none;
+  z-index: 100;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.022;
+  pointer-events: none;
+  z-index: 101;
+}
+@keyframes crt-flicker {
+  0% { opacity: 0.07; }
+  50% { opacity: 0.09; }
+  100% { opacity: 0.078; }
+}
+.scanlines {
+  animation: crt-flicker 0.15s infinite;
+  opacity: 0.095 !important;
+}
+.lyrics p.active {
+  text-shadow: 0 0 8px var(--accent), 0 0 20px var(--accent-soft), 0 0 35px var(--accent-glow) !important;
+  animation: active-lyric-bloom 2.5s ease-in-out infinite alternate;
+}
+@keyframes active-lyric-bloom {
+  0% { filter: brightness(0.94) contrast(1); }
+  100% { filter: brightness(1.12) contrast(1.08); }
+}
+.clock {
+  position: relative;
+}
+.clock::before, .clock::after {
+  content: attr(data-time);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: transparent;
+  pointer-events: none;
+}
+.clock::before {
+  color: #ff00ff;
+  left: -1px;
+  text-shadow: none;
+  z-index: -1;
+  opacity: 0.35;
+}
+.clock::after {
+  color: #00ffff;
+  left: 1px;
+  text-shadow: none;
+  z-index: -2;
+  opacity: 0.35;
+}
+
+/* --- POLISH #9: Prominent Transport Controls & Glow --- */
+.controls {
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+}
+.controls button {
+  padding: 10px;
+  opacity: 0.7;
+}
+.controls button svg {
+  width: 25px;
+  height: 25px;
+}
+#play-pause {
+  background: var(--accent-soft);
+  border-radius: 50%;
+  padding: 14px;
+  box-shadow: 0 0 15px var(--accent-glow);
+  opacity: 0.95;
+}
+#play-pause svg {
+  width: 38px;
+  height: 38px;
+}
+.controls button:hover {
+  transform: scale(1.18);
+  filter: drop-shadow(0 0 12px var(--accent));
+}
+#play-pause:hover {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 0 20px var(--accent);
+}
+
+/* --- POLISH #10: Glassy Album Frame & Reflection --- */
+.album-shell {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px var(--accent-glow);
+  transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+}
+.album-shell:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: var(--accent);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.7), 0 0 45px var(--accent-soft);
+}
+.album-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 40%, transparent 40.1%, transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 300ms ease;
+}
+.album-shell:hover::after {
+  opacity: 0.8;
+}
+
+/* Responsive adjustment for new sidebar layout */
+@media (max-width: 1091px) {
+  .col-sidebar {
+    height: auto !important;
+  }
+}
+
+/* Height-based media query for shorter viewports */
+@media (max-height: 750px) {
+  .dashboard {
+    margin: 12px auto;
+    height: calc(100vh - 24px);
+    gap: 8px;
+  }
+  .main-area {
+    padding: 8px 0;
+    gap: 16px;
+  }
+  .topbar {
+    padding: 8px 0 0;
+  }
+  .clock {
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+  }
+  .topbar-source, .weather {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+  .weather-icon {
+    width: 36px;
+    height: 36px;
+  }
+  .col-player {
+    gap: 12px;
+  }
+  .controls {
+    margin-top: 12px;
+    gap: 8px;
+  }
+  .controls button {
+    padding: 6px;
+  }
+  .controls button svg {
+    width: 20px;
+    height: 20px;
+  }
+  #play-pause {
+    padding: 10px;
+  }
+  #play-pause svg {
+    width: 30px;
+    height: 30px;
+  }
+  .track-info {
+    gap: 4px;
+  }
+  .track-info .title {
+    font-size: 1.35rem;
+  }
+  .artist-name {
+    font-size: clamp(0.75rem, 1.5vw, 0.95rem);
+  }
+  .lyrics p {
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 8px;
+  }
+  .lyrics p.active {
+    font-size: 16px;
+    line-height: 1.8;
+  }
+  .col-sidebar {
+    padding: 0;
+  }
+  .sidebar-section {
+    padding: 10px 0;
+  }
+  .lyric-bg-diagnostics {
+    padding-bottom: 10px;
+  }
+}
+
+/* ==========================================================================
+   KEYBOARD SHORTCUTS MODAL & BUTTON
+   ========================================================================== */
+
+.topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 12.5px;
+}
+
+.shortcuts-btn {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 8px;
+  padding: 8px;
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15), 0 0 10px var(--accent-glow);
+  transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
+}
+
+.shortcuts-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.shortcuts-btn:hover {
+  transform: scale(1.05);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  border-color: var(--accent);
+}
+
+.shortcuts-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 4, 5, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+
+.shortcuts-modal.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.shortcuts-content {
+  background: rgba(9, 11, 16, 0.95);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 30px var(--accent-glow), inset 0 0 15px rgba(91, 156, 246, 0.1);
+  border-radius: 12px;
+  width: min(500px, calc(100vw - 32px));
+  padding: 32px;
+  position: relative;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text);
+  transform: scale(0.9);
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.shortcuts-modal.active .shortcuts-content {
+  transform: scale(1);
+}
+
+.shortcuts-content h2 {
+  font-size: 1.4rem;
+  color: var(--accent);
+  margin-bottom: 24px;
+  letter-spacing: 2px;
+  border-bottom: 1px dashed var(--accent-soft);
+  padding-bottom: 8px;
+}
+
+.close-shortcuts {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 24px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.close-shortcuts:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.shortcuts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shortcut-row kbd {
+  background: rgba(91, 156, 246, 0.12);
+  border: 1px solid var(--accent-soft);
+  border-radius: 4px;
+  color: var(--accent);
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: 60px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.shortcut-row span {
+  font-size: 14px;
+  color: rgba(216, 232, 255, 0.85);
+}
+
+/* ==========================================================================
+   PERFORMANCE SETTINGS & OPTIMIZATIONS
+   ========================================================================== */
+
+.perf-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.perf-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.perf-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+}
+
+.perf-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  opacity: 0.6;
+}
+
+.perf-select {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.perf-select:hover, .perf-select:focus {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.perf-select option {
+  background: #090b10;
+  color: var(--accent);
+}
+
+/* Performance Mode Overrides */
+body.perf-flat-bg .background img {
+  filter: none !important;
+  opacity: 0.12 !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+}
+
+body.perf-no-crt .scanlines {
+  animation: none !important;
+  opacity: 0.04 !important;
+}
+
+body.perf-no-glow .lyrics p.active {
+  text-shadow: none !important;
+  animation: none !important;
+}
+
+body.perf-no-glow .album-shell {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+}
+
+body.perf-no-glow .album-shell:hover {
+  transform: none !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+}
+
+body.perf-no-glow .clock {
+  text-shadow: none !important;
+}
+
+body.perf-no-glow .clock::before,
+body.perf-no-glow .clock::after {
+  display: none !important;
+}
+
+body.perf-no-glow .progress-fill {
+  box-shadow: none !important;
+}
+
+body.perf-no-glow .progress-fill::after {
+  box-shadow: none !important;
+}
+
+body.perf-no-glow #play-pause {
+  box-shadow: none !important;
+}
+
+
+/* ==========================================================================
+   V2 BACKLOG FEATURES & OPTIMIZATIONS (Lyrics Scroll, History, Copy, Clock)
+   ========================================================================== */
+
+/* --- O5: Idle State Opacity Transitions --- */
+.track-info, .lyrics, .col-sidebar {
+  transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.idle .track-info { opacity: 0.8; }
+.idle .lyrics { opacity: 0.6; }
+
+/* --- UX: Clickable Clock --- */
+.clock {
+  cursor: pointer;
+}
+
+/* --- F4: Copy Lyrics Button --- */
+.copy-lyrics-btn {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 150ms ease;
+  backdrop-filter: blur(4px);
+}
+.copy-lyrics-btn:hover {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+.copy-lyrics-btn:active {
+  transform: scale(0.95);
+}
+.copy-lyrics-btn.success {
+  background: rgba(46, 117, 89, 0.24) !important;
+  border-color: #2e7559 !important;
+  color: #52c496 !important;
+}
+.copy-lyrics-btn.hidden {
+  display: none !important;
+}
+.copy-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- F3: Song History Sidebar --- */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.history-item {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--accent);
+  opacity: 0.8;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  padding-left: 8px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  max-width: 100%;
+  overflow: hidden;
+}
+.history-item:hover {
+  opacity: 1;
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.history-title {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-bright);
+}
+.history-artist {
+  opacity: 0.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.history-empty {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  opacity: 0.4;
+}
+
+

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="WebRainmeter — A Rainmeter-inspired, AI-enhanced music dashboard for the browser.">
+    <title>WebRainmeter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Share+Tech+Mono&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Share+Tech+Mono&display=swap" rel="stylesheet" media="all">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <!-- Blurred album art background -->
+    <div class="background">
+      <img id="background-art" src="assets/fallback-cover.png" alt="">
+      <div class="scanlines"></div>
+      <div class="glow" id="bg-glow"></div>
+    </div>
+
+    <main class="dashboard" aria-live="polite">
+      <!-- ─── TOPBAR ─────────────────────────────────────────── -->
+      <header class="topbar">
+        <time id="clock" class="clock">00:00</time>
+        <div class="topbar-center">
+          <div class="topbar-source">
+            <span class="pip" id="source-pip"></span>
+            <span id="topbar-source-text" class="topbar-source-text">OFFLINE</span>
+          </div>
+          <button id="shortcuts-toggle" class="shortcuts-btn" title="Keyboard Shortcuts (?)">
+            <svg viewBox="0 0 24 24">
+              <rect x="2" y="4" width="20" height="16" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"></rect>
+              <line x1="6" y1="8" x2="6.01" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="10" y1="8" x2="10.01" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="14" y1="8" x2="14.01" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="18" y1="8" x2="18.01" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="6" y1="12" x2="6.01" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="10" y1="12" x2="10.01" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="14" y1="12" x2="14.01" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="18" y1="12" x2="18.01" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="7" y1="16" x2="17.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+            </svg>
+          </button>
+        </div>
+        <section class="weather" aria-label="Current weather">
+          <div class="weather-text">
+            <div id="weather-temp" class="weather-temp">--</div>
+            <div id="weather-condition" class="weather-condition">Weather offline</div>
+          </div>
+          <img id="weather-icon" class="weather-icon" alt="">
+        </section>
+      </header>
+
+      <!-- ─── MAIN 3-COLUMN AREA ─────────────────────────────── -->
+      <div id="player" class="main-area idle">
+
+        <!-- COLUMN 1 — Now Playing -->
+        <section class="col-player" aria-label="Now Playing">
+          <div class="album-shell">
+            <img id="album-art" class="album-art" src="assets/fallback-cover.png" alt="Album art">
+            <div id="idle-screen" class="idle-screen">
+              <div class="idle-eq">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="idle-dots"><span></span><span></span><span></span></div>
+              <div class="idle-text">WAITING...</div>
+            </div>
+            <div id="corner-pip" class="corner-pip"></div>
+          </div>
+
+          <div class="track-info">
+            <h1 id="title" class="title">No track playing</h1>
+            <!-- POLISH #3: Album Section Hierarchy -->
+            <div id="artist" class="artist-name">Start WebNowPlaying</div>
+            <div class="album-meta-container">
+              <span id="album" class="album-name"></span>
+              <span class="album-meta-divider">•</span>
+              <span id="album-duration" class="album-duration">00:00</span>
+            </div>
+            <!-- END POLISH #3 -->
+          </div>
+
+          <div class="transport">
+            <div class="progress-row">
+              <span id="elapsed" class="progress-time">00:00</span>
+              <div class="progress" aria-label="Track progress">
+                <div id="progress-fill" class="progress-fill"></div>
+              </div>
+              <span id="duration" class="progress-time">00:00</span>
+            </div>
+            <div class="controls">
+              <button id="shuffle" type="button" class="icon-stroke" aria-label="Shuffle">
+                <svg viewBox="0 0 24 24">
+                  <polyline points="16 3 21 3 21 8"></polyline>
+                  <line x1="4" y1="20" x2="21" y2="3"></line>
+                  <polyline points="21 16 21 21 16 21"></polyline>
+                  <line x1="15" y1="15" x2="21" y2="21"></line>
+                  <line x1="4" y1="4" x2="9" y2="9"></line>
+                </svg>
+              </button>
+              <button id="previous" type="button" aria-label="Previous track">
+                <svg viewBox="0 0 24 24">
+                  <polygon points="11,19 2,12 11,5"></polygon>
+                  <polygon points="20,19 11,12 20,5"></polygon>
+                </svg>
+              </button>
+              <button id="play-pause" type="button" aria-label="Play or pause">
+                <svg viewBox="0 0 24 24">
+                  <rect x="6" y="4" width="4" height="16"></rect>
+                  <rect x="14" y="4" width="4" height="16"></rect>
+                </svg>
+              </button>
+              <button id="next" type="button" aria-label="Next track">
+                <svg viewBox="0 0 24 24">
+                  <polygon points="4,5 13,12 4,19"></polygon>
+                  <polygon points="13,5 22,12 13,19"></polygon>
+                </svg>
+              </button>
+              <button id="queue" type="button" class="icon-stroke" aria-label="Toggle Sidebar">
+                <svg viewBox="0 0 24 24">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <circle cx="3" cy="6" r="1"></circle>
+                  <circle cx="3" cy="12" r="1"></circle>
+                  <circle cx="3" cy="18" r="1"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- COLUMN 2 — Lyrics -->
+        <section class="col-lyrics" aria-label="Lyrics">
+          <button id="copy-lyrics" class="copy-lyrics-btn hidden" title="Copy Lyrics">
+            <span class="copy-icon">
+              <svg viewBox="0 0 24 24" width="14" height="14">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" fill="none" stroke="currentColor" stroke-width="2"></path>
+              </svg>
+            </span>
+            <span class="copy-text">COPY</span>
+          </button>
+          <div id="lyrics" class="lyrics">
+            <p>// waiting for player</p>
+          </div>
+        </section>
+
+        <!-- COLUMN 3 — Metadata Sidebar -->
+        <aside class="col-sidebar" aria-label="Metadata">
+          <!-- POLISH #6: Status Diagnostics Block -->
+          <div class="lyric-bg-diagnostics">
+            <div class="diag-item"><span class="diag-label">SYSTEM:</span> <span class="diag-val">ONLINE</span></div>
+            <div class="diag-item"><span class="diag-label">DECODER:</span> <span class="diag-val">WNP_CLI_v3.2</span></div>
+            <div class="diag-item"><span class="diag-label">LATENCY:</span> <span class="diag-val" id="diag-latency">12ms</span></div>
+            <div class="diag-item"><span class="diag-label">SYNC_LOCK:</span> <span class="diag-val">TRUE</span></div>
+          </div>
+          <div class="sidebar-section">
+            <span class="sidebar-label">// mood</span>
+            <span id="mood" class="sidebar-value mood-pill">---</span>
+          </div>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-section">
+            <span class="sidebar-label">// source</span>
+            <span id="source-val" class="sidebar-value">---</span>
+          </div>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-section">
+            <span class="sidebar-label">// format</span>
+            <span id="format-val" class="sidebar-value">---</span>
+          </div>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-section">
+            <span class="sidebar-label">// uptime</span>
+            <span id="uptime-val" class="sidebar-value">00:00:00</span>
+          </div>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-section history-section">
+            <span class="sidebar-label">// history</span>
+            <div id="history-list" class="history-list">
+              <div class="history-empty">---</div>
+            </div>
+          </div>
+          <div class="sidebar-section perf-section">
+            <span class="sidebar-label">// optimization</span>
+            <div class="perf-group">
+              <div class="perf-item">
+                <span class="perf-label">VIZ FPS:</span>
+                <select id="perf-fps" class="perf-select">
+                  <option value="60">60 FPS</option>
+                  <option value="30">30 FPS</option>
+                  <option value="15">15 FPS</option>
+                  <option value="0">OFF</option>
+                </select>
+              </div>
+              <div class="perf-item">
+                <span class="perf-label">GLOW/SHADOW:</span>
+                <select id="perf-glow" class="perf-select">
+                  <option value="on">ON</option>
+                  <option value="off">OFF</option>
+                </select>
+              </div>
+              <div class="perf-item">
+                <span class="perf-label">BACKDROP:</span>
+                <select id="perf-bg" class="perf-select">
+                  <option value="hq">BLUR (HQ)</option>
+                  <option value="fast">FLAT (FAST)</option>
+                </select>
+              </div>
+              <div class="perf-item">
+                <span class="perf-label">CRT FLICKER:</span>
+                <select id="perf-crt" class="perf-select">
+                  <option value="on">ON</option>
+                  <option value="off">OFF</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- ─── VISUALIZER (full width) ────────────────────────── -->
+      <section class="visualizer" aria-label="Visualizer" id="visualizer">
+        <canvas id="visualizer-canvas"></canvas>
+        <div class="visualizer-controls">
+          <button id="visualizer-mic" class="viz-mic-btn" title="Toggle Live Microphone Sync (System Audio)">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="currentColor"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+              <line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+            </svg>
+          </button>
+          <span class="viz-label">// visualizer</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- Keyboard Shortcuts Help Modal -->
+    <div id="shortcuts-modal" class="shortcuts-modal" aria-hidden="true">
+      <div class="shortcuts-content">
+        <button id="close-shortcuts" class="close-shortcuts" aria-label="Close shortcuts dialog">&times;</button>
+        <h2>// KEYBOARD CONTROLS</h2>
+        <div class="shortcuts-grid">
+          <div class="shortcut-row"><kbd>Space</kbd> or <kbd>K</kbd> <span>Play / Pause</span></div>
+          <div class="shortcut-row"><kbd>←</kbd> or <kbd>J</kbd> <span>Seek Back 10s</span></div>
+          <div class="shortcut-row"><kbd>→</kbd> or <kbd>L</kbd> <span>Seek Forward 10s</span></div>
+          <div class="shortcut-row"><kbd>N</kbd> or <kbd>Shift + N</kbd> <span>Next Track</span></div>
+          <div class="shortcut-row"><kbd>P</kbd> or <kbd>Shift + P</kbd> <span>Previous Track</span></div>
+          <div class="shortcut-row"><kbd>S</kbd> <span>Toggle Shuffle</span></div>
+          <div class="shortcut-row"><kbd>Q</kbd> <span>Toggle Sidebar</span></div>
+          <div class="shortcut-row"><kbd>?</kbd> <span>Toggle This Menu</span></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.4.0/color-thief.umd.js" crossorigin="anonymous"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
